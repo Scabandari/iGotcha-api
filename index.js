@@ -12,7 +12,11 @@ mongoose.connect(keys.mongoURI, {
 mongoose.Promise = global.Promise;
 
 const User = require('./models/User');
+const Session = require('./models/Session');
+const Comment = require('./models/Comment');
 const userRoutes = require('./routes/userRoutes');
+const sessionRoutes = require('./routes/sessionRoutes');
+const commentRoutes = require('./routes/commentRoutes');
 
 const app = express();
 app.use(express.json({ extended: false }));
@@ -20,6 +24,8 @@ app.use(cors());
 // app.use(bodyParser.json());
 
 app.use('/users', userRoutes);
+app.use('/sessions', sessionRoutes);
+app.use('/comments', commentRoutes);
 
 app.get('/', (req, res) => {
   res.send('world');

@@ -2,8 +2,10 @@ const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
 const User = require('../models/User');
+const Session = require('../models/Session');
 const { check, validationResult } = require('express-validator');
 // const bcrypt = require('bcryptjs');  TODO !!!!!!!!!!
+
 
 router.get('/:id', async (req, res) => {
   try {
@@ -33,13 +35,21 @@ router.post(
     if (!errors.isEmpty()) {
       return res.status(400).json({ errors: errors.array() });
     }
-    try {
-      const user = await new User(req.body);
-      await user.save();
-      res.send(user);
-    } catch (err) {
-      res.status(500).send({ msg: 'Error making POST to /user', err });
+    //try {
+    const user = await new User(req.body);
+    /// Normally wouldn't do this part but need Session to have list of players
+    const sessions = await Session.find({});
+    for (let ses of sessions) {
+      const players = ses.players;
+      players.push(user);
+      ses.players = players;
+      await ses.save();
     }
+    await user.save();
+    res.send(user);
+    // } catch (err) {
+    //   res.status(500).send({ msg: 'Error making POST to /user', err });
+    // }
   }
 );
 
@@ -64,9 +74,11 @@ router.post(
     const { email, password } = req.body;
     console.log(`email: ${email} pwrd: ${password}`);
     const user = await User.findOne({ email });
-    if (user.password === password) {
-      res.send(user);
-    } else {
+    try {
+      if (user.password === password) {
+        res.send(user);
+      }
+    } catch (err) {
       res.status(400).send('Something went wrong.');
     }
   }
