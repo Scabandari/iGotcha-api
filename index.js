@@ -11,12 +11,15 @@ mongoose.connect(keys.mongoURI, {
 });
 mongoose.Promise = global.Promise;
 
+const User = require('./models/User');
+const userRoutes = require('./routes/userRoutes');
+
 const app = express();
 app.use(express.json({ extended: false }));
 app.use(cors());
 // app.use(bodyParser.json());
 
-
+app.use('/users', userRoutes);
 
 app.get('/', (req, res) => {
   res.send('world');
